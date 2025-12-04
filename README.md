@@ -46,6 +46,17 @@ Windowsでこのリポジトリをcloneするには、まず**Git for Windows**�
    - GUIツールを使いたい場合は、[GitHub Desktop](https://desktop.github.com/) も利用できます
    - GitHub Desktopを使う場合は、Git for Windowsは自動的にインストールされます
 
+3. **日本語を含むパス名に関する注意**
+   - Windowsで日本語を含むパス名（例：`C:\Users\ユーザー名\ドキュメント\研究`）を使用すると、文字化けやエラーが発生する可能性があります
+   - **推奨**: リポジトリをcloneする際は、英語のみのパス名を使用してください
+     - 例：`C:\Users\username\Documents\research` または `C:\projects\TwoEWInterfaceVesselModel`
+   - 日本語パスを使用する場合は、以下の設定を試してください：
+     ```bash
+     git config --global core.quotepath false
+     git config --global i18n.commitencoding utf-8
+     git config --global i18n.logoutputencoding utf-8
+     ```
+
 ### macOS/Linuxユーザー向け
 
 macOSやLinuxでは、通常Gitは既にインストールされています。インストールされていない場合は、以下のコマンドでインストールできます：
@@ -57,6 +68,8 @@ macOSやLinuxでは、通常Gitは既にインストールされています。�
 ## リポジトリの取得
 
 このリポジトリをcloneするには、以下のいずれかの方法を使用してください：
+
+**重要（Windowsユーザー）**: 日本語を含むパス名（例：`ドキュメント\研究`）は文字化けの原因となる可能性があります。可能な限り、英語のみのパス名（例：`Documents\research`）を使用してください。
 
 ### HTTPS（推奨）
 
