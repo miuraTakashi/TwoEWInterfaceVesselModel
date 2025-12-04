@@ -10,6 +10,9 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from copy import deepcopy
 from matplotlib import animation
+import os
+from pathlib import Path
+import datetime
 
 
 # 血管壁の動きの支配方程式：
@@ -130,7 +133,7 @@ def TwoVesselModel(L=5, dh=1, sigma=1, ks=0.1, ke=0.1, w1=1, w2=2, r=0.5, fps=20
     return hList
 
 
-def plotVessel(h, ax=None):
+def plotVessel(h, ax=None, save_path=None):
     """
     血管の界面位置をプロットする関数
     
@@ -139,9 +142,16 @@ def plotVessel(h, ax=None):
     h : list
         [h1, h2, h3, h4] のリスト
     ax : matplotlib.axes.Axes, optional
-        プロットする軸。指定しない場合は現在の軸を使用
+        プロットする軸。指定しない場合は新しい図を作成
+    save_path : str, optional
+        保存先のパス。指定しない場合はresultsフォルダに自動保存
     """
-    ax = ax if ax is not None else plt.gca()
+    if ax is None:
+        fig, ax = plt.subplots()
+        create_new_figure = True
+    else:
+        create_new_figure = False
+    
     ax.plot(h[0], color='red')
     ax.plot(h[1], color='red')
     ax.plot(h[2], color='red')
@@ -150,8 +160,23 @@ def plotVessel(h, ax=None):
     ax.set_aspect('equal')
     ax.fill_between(range(len(h[0])), h[0], h[1], color='red', alpha=0.2)
     ax.fill_between(range(len(h[2])), h[2], h[3], color='red', alpha=0.2)
-    if ax is plt.gca():
-        plt.show()
+    
+    if create_new_figure:
+        # resultsフォルダを作成
+        results_dir = Path("results")
+        results_dir.mkdir(exist_ok=True)
+        
+        # 保存パスを決定
+        if save_path is None:
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            save_path = results_dir / f"vessel_{timestamp}.png"
+        else:
+            save_path = Path(save_path)
+            save_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        plt.savefig(save_path, dpi=150, bbox_inches='tight')
+        plt.close(fig)
+        print(f"画像を保存しました: {save_path}")
 
 
 def export_vessel_animation(dh=0.1, sigma=1, ks=0.001, ke=0.1, w1=1, w2=2, r=0.5, T=100, fps=20):
@@ -193,7 +218,11 @@ def export_vessel_animation(dh=0.1, sigma=1, ks=0.001, ke=0.1, w1=1, w2=2, r=0.5
         # 進捗バーも抑止
         result = TwoVesselModel(dh=dh, sigma=sigma, ks=ks, ke=ke, w1=w1, w2=w2, r=r, T=T, fps=20, progress=False)
 
-        filename = f"vessel_dh{dh}_sigma{sigma}_ks{ks}_ke{ke}.mp4"
+        # resultsフォルダを作成
+        results_dir = Path("results")
+        results_dir.mkdir(exist_ok=True)
+        
+        filename = results_dir / f"vessel_dh{dh}_sigma{sigma}_ks{ks}_ke{ke}.mp4"
         fig, ax = plt.subplots()
 
         def animate(i):
@@ -221,14 +250,14 @@ if __name__ == "__main__":
     # 使用例1: 基本的なシミュレーション
     print("=== 基本的なシミュレーション ===")
     result = TwoVesselModel(L=5, dh=0.1, sigma=1, ks=0.1, ke=0.1, T=100)
-    plotVessel(result[-1])
+    plotVessel(result[-1], save_path="results/vessel_basic.png")
     
     # 使用例2: 異なるパラメータでの比較
     print("\n=== 異なるパラメータでの比較 ===")
     for ks in [10, 0]:
         result = TwoVesselModel(ks=ks, ke=1, sigma=1, T=100)
         print(f"ks={ks}")
-        plotVessel(result[-1])
+        plotVessel(result[-1], save_path=f"results/vessel_ks{ks}.png")
     
     # 使用例3: アニメーションの生成
     print("\n=== アニメーションの生成 ===")
@@ -257,14 +286,20 @@ if __name__ == "__main__":
     # h3hatMean = np.array(h3hatList).mean(axis=0)
     # h4hatMean = np.array(h4hatList).mean(axis=0)
     # 
-    # plt.plot(h1hatMean)
-    # plt.plot(h2hatMean)
-    # plt.plot(h3hatMean)
-    # plt.plot(h4hatMean)
-    # plt.xlim(1, 25)
-    # plt.ylim(0.1, 10)
-    # plt.xscale('log')
-    # plt.yscale('log')
-    # plt.legend(["h1", "h2", "h3", "h4"])
-    # plt.show()
+    # fig, ax = plt.subplots()
+    # ax.plot(h1hatMean)
+    # ax.plot(h2hatMean)
+    # ax.plot(h3hatMean)
+    # ax.plot(h4hatMean)
+    # ax.set_xlim(1, 25)
+    # ax.set_ylim(0.1, 10)
+    # ax.set_xscale('log')
+    # ax.set_yscale('log')
+    # ax.legend(["h1", "h2", "h3", "h4"])
+    # 
+    # results_dir = Path("results")
+    # results_dir.mkdir(exist_ok=True)
+    # plt.savefig(results_dir / "fourier_analysis.png", dpi=150, bbox_inches='tight')
+    # plt.close(fig)
+    # print(f"統計解析結果を保存しました: {results_dir / 'fourier_analysis.png'}")
 
