@@ -1,0 +1,190 @@
+# TwoEWInterfaceVesselModel
+
+血管壁の動きをシミュレーションする数値計算モデルです。2つの血管の界面の時間発展を、拡散、ランダムノイズ、弾性相互作用を考慮して計算します。
+
+## 概要
+
+このプロジェクトは、血管壁の界面位置の時間発展を記述する偏微分方程式を数値的に解くことで、血管の形態変化をシミュレーションします。特に、炎症時の細胞間接着の減少や、周辺組織との相互作用を考慮したモデルです。
+
+## 支配方程式
+
+4つの界面位置 $h_1, h_2, h_3, h_4$ の時間発展は以下の偏微分方程式で記述されます：
+
+$$\partial_t h_1= d_h \partial_{x}^2 h_1 + \sigma \eta_1(x,t) -k_s/w_1\big(h_1-(H-w_1)\big)+k_e/(2r)(h_2-h_1+2r)$$
+
+$$\partial_t h_2= d_h \partial_{x}^2 h_2 + \sigma \eta_2(x,t) -k_e/(2r)(h_2-h_1+2r)+k_s/w_2(h_3-h_2+w_2)$$
+
+$$\partial_t h_3= d_h \partial_{x}^2 h_3 + \sigma \eta_3(x,t) -k_s/w_2(h_3-h_2+w_2)+k_e/(2r)(h_4-h_3+2r)$$
+
+$$\partial_t h_4= d_h \partial_{x}^2 h_4 + \sigma \eta_4(x,t) -k_e/(2r)(h_4-h_3+2r)-k_s/w_1(h_4+H-w_1)$$
+
+### パラメータの説明
+
+- **$h_i(x,t)$**: 時刻$t$で場所$x$の$i$番目の血管の界面の位置
+- **$d_h$**: 血管壁の表面張力。炎症時には細胞間接着が外れて減少する
+- **$\sigma$**: 内皮細胞のランダムな運動の強さ
+- **$\eta_i(x,t)$**: 平均0、分散1の正規分布の乱数（標準正規乱数）
+- **$k_s$**: 周辺の結合組織の硬さ（単位長さあたりのバネ係数）
+- **$k_e$**: 血管壁同士の相互作用の単位長さあたりのバネ係数
+- **$H$**: 血管系全体の高さの範囲（$H = w_2/2 + 2r + w_1$で自動計算）
+- **$w_1$**: 血管と表皮の間の間隔（デフォルト: 1）
+- **$w_2$**: 血管同士の間の間隔（デフォルト: 2）
+- **$r$**: 血管の半径（デフォルト: 0.5）
+
+## セットアップ
+
+### Windowsユーザー向け
+
+Windowsでこのリポジトリをcloneするには、まず**Git for Windows**をインストールする必要があります。
+
+1. **Git for Windowsのインストール**
+   - [Git for Windows](https://git-scm.com/download/win) からダウンロードしてインストール
+   - インストール中はデフォルト設定で問題ありません
+   - インストール後、コマンドプロンプトまたはPowerShellを開いて `git --version` でインストールを確認
+
+2. **GitHub Desktop（オプション）**
+   - GUIツールを使いたい場合は、[GitHub Desktop](https://desktop.github.com/) も利用できます
+   - GitHub Desktopを使う場合は、Git for Windowsは自動的にインストールされます
+
+### macOS/Linuxユーザー向け
+
+macOSやLinuxでは、通常Gitは既にインストールされています。インストールされていない場合は、以下のコマンドでインストールできます：
+
+- **macOS**: `brew install git` (Homebrewを使用する場合)
+- **Linux (Ubuntu/Debian)**: `sudo apt-get install git`
+- **Linux (CentOS/RHEL)**: `sudo yum install git`
+
+## リポジトリの取得
+
+このリポジトリをcloneするには、以下のいずれかの方法を使用してください：
+
+### HTTPS（推奨）
+
+```bash
+git clone https://github.com/miuraTakashi/TwoEWInterfaceVesselModel.git
+```
+
+**注意**: publicリポジトリの場合、認証は不要です。パスワードを要求された場合は、リポジトリがprivateになっている可能性があります。その場合は、リポジトリの設定を確認するか、SSH方式を使用してください。
+
+### SSH
+
+```bash
+git clone git@github.com:miuraTakashi/TwoEWInterfaceVesselModel.git
+```
+
+SSH方式を使用する場合は、事前にSSH鍵をGitHubに登録しておく必要があります。
+
+## 必要な環境
+
+- Python 3.x
+- NumPy
+- Matplotlib
+- tqdm
+- Jupyter Notebook（可視化用）
+
+## インストール
+
+```bash
+pip install numpy matplotlib tqdm jupyter
+```
+
+## 使い方
+
+### 基本的なシミュレーション
+
+```python
+from TwoEWInterfaceVessel import TwoVesselModel, plotVessel
+
+# シミュレーション実行
+result = TwoVesselModel(L=5, dh=0.1, sigma=1, ks=0.1, ke=0.1, T=100)
+
+# 最終状態をプロット
+plotVessel(result[-1])
+```
+
+### パラメータの説明
+
+`TwoVesselModel`関数の主なパラメータ：
+
+- **L**: 空間領域の長さ（デフォルト: 5）
+- **dh**: 表面張力係数 $d_h$（デフォルト: 1）
+- **sigma**: ノイズ強度 $\sigma$（デフォルト: 1）
+- **ks**: 結合組織の硬さ $k_s$（デフォルト: 0.1）
+- **ke**: 血管間相互作用 $k_e$（デフォルト: 0.1）
+- **w1**: 血管と表皮の間隔（デフォルト: 1）
+- **w2**: 血管間の間隔（デフォルト: 2）
+- **r**: 血管の半径（デフォルト: 0.5）
+- **T**: シミュレーション時間（デフォルト: 1000）
+- **fps**: アニメーションのフレームレート（デフォルト: 20）
+- **progress**: 進捗バーの表示（デフォルト: True）
+
+### アニメーションの生成
+
+```python
+from TwoEWInterfaceVessel import export_vessel_animation
+
+# MP4ファイルとして保存
+filename = export_vessel_animation(dh=0.1, sigma=1, ks=0.1, ke=0.1, T=100)
+```
+
+生成されるファイル名は `vessel_dh{dh}_sigma{sigma}_ks{ks}_ke{ke}.mp4` の形式です。
+
+### Jupyter Notebookでの可視化
+
+```python
+from matplotlib import animation
+from IPython.display import HTML, display
+
+fig, ax = plt.subplots()
+
+def animate(i):
+    ax.clear()
+    plotVessel(result[i], ax=ax)
+    ax.set_title(f"Frame {i}")
+
+ani = animation.FuncAnimation(fig, animate, frames=len(result), interval=50, repeat=False)
+display(HTML(ani.to_jshtml()))
+```
+
+### 統計解析
+
+複数のシミュレーションを実行してフーリエ解析を行う例：
+
+```python
+resultList = []
+for i in range(100):
+    result = TwoVesselModel(T=100)
+    resultList.append(result)
+
+# フーリエ変換
+h1hatList = []
+for i in range(100):
+    h1hatList.append(np.abs(np.fft.fft(resultList[i][-1][0])))
+
+h1hatMean = np.array(h1hatList).mean(axis=0)
+plt.plot(h1hatMean)
+plt.xscale('log')
+plt.yscale('log')
+plt.show()
+```
+
+## ファイル構成
+
+- `TwoEWInterfaceVessel.ipynb`: メインのJupyterノートブック
+- `vessel_*.mp4`: 生成されたアニメーションファイル（パラメータごと）
+
+## 数値計算の詳細
+
+- 空間離散化: $\Delta x = 0.1$
+- 時間離散化: $\Delta t = 0.001$
+- 境界条件: 周期境界条件（両端の値は固定）
+- 数値解法: オイラー法（拡散項は有限差分法で離散化）
+
+## ライセンス
+
+このプロジェクトは研究目的で作成されています。
+
+## 参考文献
+
+血管壁の動きの数理モデルに関する研究に基づいています。
+
