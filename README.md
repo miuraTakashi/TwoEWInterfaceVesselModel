@@ -80,17 +80,33 @@ SSH方式を使用する場合は、事前にSSH鍵をGitHubに登録してお�
 - NumPy
 - Matplotlib
 - tqdm
-- Jupyter Notebook（可視化用）
+- Jupyter Notebook（オプション、ノートブックを使用する場合のみ）
 
 ## インストール
+
+### requirements.txtを使用する場合（推奨）
+
+```bash
+pip install -r requirements.txt
+```
+
+### 個別にインストールする場合
 
 ```bash
 pip install numpy matplotlib tqdm jupyter
 ```
 
+**注意**: Jupyter Notebookは、`.ipynb`ファイルを使用する場合のみ必要です。`.py`ファイルのみを使用する場合は不要です。
+
 ## 使い方
 
-### 基本的なシミュレーション
+このプロジェクトには2つの形式のファイルがあります：
+- **`TwoEWInterfaceVessel.py`**: Pythonスクリプト（推奨、LLMを介した修正が容易）
+- **`TwoEWInterfaceVessel.ipynb`**: Jupyter Notebook（対話的な実行に便利）
+
+### Pythonスクリプト（.py）を使用する場合
+
+#### 基本的なシミュレーション
 
 ```python
 from TwoEWInterfaceVessel import TwoVesselModel, plotVessel
@@ -101,6 +117,18 @@ result = TwoVesselModel(L=5, dh=0.1, sigma=1, ks=0.1, ke=0.1, T=100)
 # 最終状態をプロット
 plotVessel(result[-1])
 ```
+
+#### コマンドラインから直接実行
+
+```bash
+python TwoEWInterfaceVessel.py
+```
+
+これにより、デフォルトパラメータでシミュレーションが実行され、使用例が表示されます。
+
+### Jupyter Notebook（.ipynb）を使用する場合
+
+ノートブックを開いて、セルを順番に実行してください。
 
 ### パラメータの説明
 
@@ -170,7 +198,9 @@ plt.show()
 
 ## ファイル構成
 
-- `TwoEWInterfaceVessel.ipynb`: メインのJupyterノートブック
+- `TwoEWInterfaceVessel.py`: Pythonスクリプト（推奨、LLMを介した修正が容易）
+- `TwoEWInterfaceVessel.ipynb`: Jupyterノートブック（対話的な実行に便利）
+- `requirements.txt`: 必要なPythonパッケージのリスト
 - `vessel_*.mp4`: 生成されたアニメーションファイル（パラメータごと）
 
 ## 数値計算の詳細
